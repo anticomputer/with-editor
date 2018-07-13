@@ -155,15 +155,24 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
              (truename (file-chase-links linkname)))
         (unless (equal truename linkname)
           (push (directory-file-name (file-name-directory truename)) path)))
-      (when (eq system-type 'darwin)
-        (let ((dir (expand-file-name "bin" invocation-directory)))
-          (when (file-directory-p dir)
-            (push dir path)))
-        (when (string-match-p "Cellar" invocation-directory)
-          (let ((dir (expand-file-name "../../../bin" invocation-directory)))
-            (when (file-directory-p dir)
-              (push dir path))))))
+      (setq path (nconc path (with-editor-emacsclient-path-darwin
+                              invocation-directory))))
     (cl-remove-duplicates path :test 'equal)))
+
+(defun with-editor-emacsclient-path-darwin (invocation-dir)
+  ;; On macOS we often are confronted with:
+  ;; /common/part/bin/emacsclient and
+  ;; /common/part/emacs (without bin).
+  (when (eq system-type 'darwin)
+    (let (path)
+      (let ((dir (expand-file-name "bin" invocation-dir)))
+        (when (file-directory-p dir)
+          (push dir path)))
+      (when (string-match-p "Cellar" invocation-dir)
+        (let ((dir (expand-file-name "../../../bin" invocation-dir)))
+          (when (file-directory-p dir)
+            (push dir path))))
+      path)))
 
 (defcustom with-editor-emacsclient-executable (with-editor-locate-emacsclient)
   "The Emacsclient executable used by the `with-editor' macro."
