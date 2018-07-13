@@ -148,7 +148,7 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
       (cadr (split-string (car (process-lines exec "--version")))))))
 
 (defun with-editor-emacsclient-path ()
-  (let ((path exec-path))
+  (let ((path (copy-sequence exec-path)))
     (when invocation-directory
       (push (directory-file-name invocation-directory) path)
       (let* ((linkname (expand-file-name invocation-name invocation-directory))
