@@ -154,7 +154,10 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
       (let* ((linkname (expand-file-name invocation-name invocation-directory))
              (truename (file-chase-links linkname)))
         (unless (equal truename linkname)
-          (push (directory-file-name (file-name-directory truename)) path)))
+          (let ((truedir (directory-file-name (file-name-directory truename))))
+            (push truedir path)
+            (setq path (nconc path (with-editor-emacsclient-path-darwin
+                                    truedir))))))
       (setq path (nconc path (with-editor-emacsclient-path-darwin
                               invocation-directory))))
     (cl-remove-duplicates path :test 'equal)))
